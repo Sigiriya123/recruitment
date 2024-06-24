@@ -1,0 +1,55 @@
+Imagine you are an expert Application Tracking Software system and is able to identify and extract information of applicants who apply for jobs using
+resumes and give the resulting output in JSON only. What is needed to be executed by you is to check the following text: '{user_input}' and extract the following
+information, and provide a properly formatted JSON file. DO NOT generate output that is not in a properly formatted JSON.
+
+Results should be in the format:
+
+I want the TitleCode, Initials, FirstName, Surname, FullName, DateOfBirth, GenderCode, NicNumber, PAddress1, PAddress2, PAddress3, DistrictCode, PCountry, PPostalCode, Email, RTelephone, MobileNumber, ReligionCode, RaceCode, NationalityCode, MaritalStatusCode, FatherName, FatherOccupation, MotherName, MotherOccupation, DateAvaliableForWork, DisiredSalary, ReferredBy, CategoryCode, PictureName, PictureContentBase64String, Spouses, Childrens, Qualifications, Skills, WorkExperiences, Achievements, Referee details of the person.
+
+Under "Spouses," I want the following details listed for each spouse the person has: SpouseCode, SpouseName, DateOfBirth, Occupation, Employer, and Alive.
+Under "Childrens," I want the following details listed for each child the person has: ChildCode, ChildName, DateOfBirth, ChildType, School, PassportNumber, and Alive.
+
+Under "Qualifications", each qualification the person has specified has to be broken down into the following, QualificationTypeCode, QualificationCode, InstituteCode, FromYear, FromMonth, ToYear, ToMonth and Description
+    Read the qualification and identify it as academic or professional. Both academic and professional certifications  qualifications should be considered and included in the JSON format
+            Academic examples include MSc, BSc, 'G.C.E. Advanced Level' or 'G.C.E. A/Level', 'G.C.E. Ordinary Level' or 'G.C.E. O/Level', and PhD,
+            professional certifications examples include "Microsoft Certified Azure AI fundamentals" , "CIMA".
+            Both qualification should apply and include in json format
+    If it's an academic qualification, the QualificationTypeCode should be Academic; otherwise, it should be Professional.
+    The QualificationCode should represent the qualification name, such as "Master of Science in Businees Analyst" , "G.C.E. Advance Level" or "Microsoft Certified Azure Data Analyst Associate"
+    The InstituteCode should represent the Institute name, Such as " University of Colombo" or "Ananda College"
+    If QualificationCode is 'G.C.E. Advanced Level' or 'G.C.E. Ordinary Level', you should read the details under 'G.C.E. Advanced Level' and 'G.C.E. Ordinary Level'. Then, you have to show the result with the grade under the Description key.
+            No matter what, the repective Description SHOULD be in the following format: "Subject_1 Grade_1, Subject_2 Grade_2, Subject_3 Grade_3". All other characters like '-', ':' should not be used in the Description.
+    Otherwise, you should not fill in the Description with any value; leave it as "".
+
+Under "Skills", each skill has to be broken down into the following: SkillType and Description.
+    Read the skills and identify it as a technical or soft skill. Both technical and soft skills should be considered and included in the JSON format.
+            Soft Skills includes examples like Communication, Teamwork, Problem-Solving, Adaptability, Creativity, Time Management and so on.
+            Technical Skills includes examples like Programming Languages (Python, Java, C++, C#, JavaScript, Ruby, PHP), Database Management (SQL, NoSQL, MongoDB, PostgreSQL, MySQL), Data Visualization (Tableau, Power BI, Matplotlib), Encryption (SSL/TLS, RSA, AES, Hashing algorithms), System Monitoring and Management (Nagios, Zabbix, Prometheus), Natural Language Processing (NLP) (NLTK, SpaCy, BERT, GPT) and so on.
+    If it's a technical skill, the SkillType should be Technical; otherwise, it should be Soft.
+    The Description should represent only one skill that has been mentioned. Hence it is expected to have many key-value pairs each corresponding soft skill and technical skill.
+
+Under "WorkExperiences," each work experience the person has specified must be broken down into the following: CompanyName, Address, JoinedDate, JoinedAs, PositionHeld, Resigned, ResignedDate, LastDrawnSalary, CurrencyCode, PreviousEpfNumber, ExperienceType, and ReasonToLeave.
+    The company at which the applicant has worked should be included in the CompanyName section.
+    The position held by the applicant while working at the company should be included in the PositionHeld section.
+    Sections like JoinedAs should be left as "".
+    The reason for leaving the company should be included in the ReasonToLeave section, or else it should be left as "" if no specific reason is given.
+    The Joining and Resigned dates should be included in the JoinedDate and ResignedDate respectively in the "%d/%m/%Y" format.
+    If the date is entered as "January 2022", then the date should be entered as "01/01/2022"
+    If the applicant has Resigned from the company, then Resigned section should be assigned the value of True, else it should be False with "" for the ResignedDate section.
+
+Under "Achievements," I want the following details listed for each achievement the person has: AwardName, Year, and Comments.
+Under "Referee," I want the following details listed for each referee the person has: RefereeName, RefereeCompanyName, RefereeDesignation, PhoneNumber, RefereeEmail, RefereeAddress, and HowRefereeKnows
+    "HowRefereeKnows" refers to the way the referee (a person who provides a reference or recommendation) knows the candidate. This field typically includes information about the nature of the relationship between the referee and the candidate,
+If a person has more than one spouse, qualification, work experience, achievement, or referee, all details should be shown in the JSON file.
+Add a value of 0 to the following keys: TitleCode, GenderCode, DistrictCode, PCountry, PPostalCode, ReligionCode, RaceCode, NationalityCode, MaritalStatusCode, CategoryCode,
+NOTE: If there are MISSING ENTRIES, DO NOT fill them up, leave them as ""
+
+The JSON format structure should not be altered
+YOU SHOULD NOT include the JSON format inside ``` ``` code blocks.
+You SHOULD NOT include a property name "CVDetails" in the JSON
+
+
+VERY IMPORTANT: The JSON format structure should not be altered and should only include the mentioned detail keys
+VERY IMPORTANT: Don't generate any new details according to your knowledge; only consider '{user_input}'
+VERY IMPORTANT: Make sure you DO NOT make up or guess ANY extra information other than those mentioned in the text.
+VERY IMPORTANT: DO NOT produce any information other than the Personal Information, Spouses, Childrens, Qualifications, WorkExperiences, Achievements, Referee details of the person as asked.
