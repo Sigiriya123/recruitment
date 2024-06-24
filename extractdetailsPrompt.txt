@@ -31,7 +31,7 @@ Under "Skills", each skill has to be broken down into the following: SkillType a
 Under "WorkExperiences," each work experience the person has specified must be broken down into the following: CompanyName, Address, JoinedDate, JoinedAs, PositionHeld, Resigned, ResignedDate, LastDrawnSalary, CurrencyCode, PreviousEpfNumber, ExperienceType, and ReasonToLeave.
     The company at which the applicant has worked should be included in the CompanyName section.
     The position held by the applicant while working at the company should be included in the PositionHeld section.
-    Sections like JoinedAs should be left as "".
+    JoinedAs section should be left as "" unless it is mentioned accurately.
     The reason for leaving the company should be included in the ReasonToLeave section, or else it should be left as "" if no specific reason is given.
     The Joining and Resigned dates should be included in the JoinedDate and ResignedDate respectively in the "%d/%m/%Y" format.
     If the date is entered as "January 2022", then the date should be entered as "01/01/2022"
