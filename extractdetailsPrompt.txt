@@ -9,15 +9,17 @@ I want the TitleCode, Initials, FirstName, Surname, FullName, DateOfBirth, Gende
 Under "Spouses," I want the following details listed for each spouse the person has: SpouseCode, SpouseName, DateOfBirth, Occupation, Employer, and Alive.
 Under "Childrens," I want the following details listed for each child the person has: ChildCode, ChildName, DateOfBirth, ChildType, School, PassportNumber, and Alive.
 
-Under "Qualifications", each qualification the person has specified has to be broken down into the following, QualificationTypeCode, QualificationCode, InstituteCode, FromYear, FromMonth, ToYear, ToMonth and Description
+Under "Qualifications", each qualification the person has specified has to be broken down into the following, QualificationType, QualificationName, InstituteCode, FromYear, FromMonth, ToYear, ToMonth and Description
     Read the qualification and identify it as academic or professional. Both academic and professional certifications  qualifications should be considered and included in the JSON format
             Academic examples include MSc, BSc, 'G.C.E. Advanced Level' or 'G.C.E. A/Level', 'G.C.E. Ordinary Level' or 'G.C.E. O/Level', and PhD,
+            in cases where it is mentioned as 'G.C.E. A/Level' or 'G.C.E. Advanced Level' or 'A/Level' they should be renamed as 'G.C.E. Advanced Level Examination',
+            in cases where it is mentioned as 'G.C.E. O/Level' or 'G.C.E. Ordinary Level' or 'O/Level' they should be renamed as 'G.C.E. Ordinary Level Examination',
             professional certifications examples include "Microsoft Certified Azure AI fundamentals" , "CIMA".
             Both qualification should apply and include in json format
-    If it's an academic qualification, the QualificationTypeCode should be Academic; otherwise, it should be Professional.
-    The QualificationCode should represent the qualification name, such as "Master of Science in Businees Analyst" , "G.C.E. Advance Level" or "Microsoft Certified Azure Data Analyst Associate"
+    If it's an academic qualification, the QualificationType should be Academic; otherwise, it should be Professional.
+    The QualificationName should represent the qualification name, such as "Master of Science in Businees Analyst" , "G.C.E. Advance Level Examination" or "Microsoft Certified Azure Data Analyst Associate"
     The InstituteCode should represent the Institute name, Such as " University of Colombo" or "Ananda College"
-    If QualificationCode is 'G.C.E. Advanced Level' or 'G.C.E. Ordinary Level', you should read the details under 'G.C.E. Advanced Level' and 'G.C.E. Ordinary Level'. Then, you have to show the result with the grade under the Description key.
+    If QualificationName is 'G.C.E. Advanced Level Examination' or 'G.C.E. Ordinary Level Examination', you should read the details under them. Then, you have to show the subjects with the grade under the Description key.
             No matter what, the repective Description SHOULD be in the following format: "Subject_1 Grade_1, Subject_2 Grade_2, Subject_3 Grade_3". All other characters like '-', ':' should not be used in the Description.
     Otherwise, you should not fill in the Description with any value; leave it as "".
 
