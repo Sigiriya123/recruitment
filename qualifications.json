@@ -1,0 +1,132 @@
+{
+  "QualificationList": [
+    {
+      "QualificationName": "Bachelor of Science in Statistics",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Bachelor of Science in Computer Science",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Master of Science in Statistics",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "G.C.E. Advanced Level",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "G.C.E Ordinary Level",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Chartered Institute of Management Accountants (CIMA)",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Association of Chartered Certified Accountants (ACCA)",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Project Management Professional (PMP)",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Python for Data Science",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Machine Learning",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Six Sigma Certification",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Data Visualization Certification",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Doctor of Philosophy (PhD) in Statistics",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Master of Science in Data Science",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Master of Business Administration (MBA) with a specialization in Analytics",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Bachelor of Arts (BA) in Mathematics",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Bachelor of Science (BSc) in Information Technology",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Diploma in Statistics",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Diploma in Data Analysis",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Associate's Degree in Computer Science",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Postgraduate Certificate in Econometrics",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Postgraduate Diploma in Financial Mathematics",
+      "QualificationType": "Academic"
+    },
+    {
+      "QualificationName": "Certified Statistical Analyst (CSA)",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Certified Analytics Professional (CAP)",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Google Data Analytics Professional Certificate",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "AWS Certified Data Analytics - Specialty",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Microsoft Certified Azure Data Analyst Associate",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "SQL Server Certification",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Java Certification",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Certified Ethical Hacker (CEH)",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "CompTIA Security+",
+      "QualificationType": "Professional"
+    },
+    {
+      "QualificationName": "Cloud Computing Certification (e.g., AWS Certified Solutions Architect)",
+      "QualificationType": "Professional"
+    }
+  ]
+}
