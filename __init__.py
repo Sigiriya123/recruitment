@@ -1,116 +1,211 @@
 import logging
-import base64
 import azure.functions as func
-import fitz
-import numpy as np
-import pdfplumber
 import os
 from openai import AzureOpenAI
-from io import BytesIO
 import json
-from sentence_transformers import SentenceTransformer, util
+from datetime import datetime
 
 os.environ['OPENAI_API_KEY'] = "1c18b8371a78404d9183cffeeb87042d"
 os.environ['OPENAI_ENDPOINT'] = "https://mihcm-openai-australiaeast.openai.azure.com/"
 
 client = AzureOpenAI(
-    azure_endpoint = os.environ.get('OPENAI_ENDPOINT'),
-    api_key = os.environ.get('OPENAI_API_KEY'),
-    api_version = "2024-02-15-preview"
+    azure_endpoint=os.environ.get('OPENAI_ENDPOINT'),
+    api_key=os.environ.get('OPENAI_API_KEY'),
+    api_version="2024-02-15-preview"
 )
 
-   
 # Load prompt files once at the beginning
 script_directory = os.path.dirname(os.path.abspath(__file__))
-extract_details_file = os.path.join(script_directory, 'extractdetailsPrompt.txt')
+degree_compare_file = os.path.join(script_directory, 'degreecomparePrompt.txt')
 
-with open(extract_details_file, 'r') as text_file:
-    extract_details_content = text_file.read()
+with open(degree_compare_file, 'r') as text_file:
+    degree_compare_content = text_file.read()
 
-extract_detailsPrompt_main = f""" {extract_details_content} """
+degree_comparePrompt_main = f""" {degree_compare_content} """
+
+duration_work_file = os.path.join(script_directory, 'durationworkPrompt.txt')
+
+with open(duration_work_file, 'r') as text_file:
+    duration_work_content = text_file.read()
+
+duration_workPrompt_main = f""" {duration_work_content} """
 
 
-def estimate_columns(pdf_bytes, page_number=0):
+relation_work_file = os.path.join(script_directory, 'relationworkPrompt.txt')
+
+with open(relation_work_file, 'r') as text_file:
+    relation_work_content = text_file.read()
+
+relation_workPrompt_main = f""" {relation_work_content} """
+
+# Separate JD rules
+def separate_rules(JD_dict):
+    ol_rules = [rule for rule in JD_dict['Rules'] if "Ordinary Level" in rule['Rule']]
+    al_rules = [rule for rule in JD_dict['Rules'] if "Advanced Level" in rule['Rule']]
+    degree_rules = [rule for rule in JD_dict['Rules'] if "University or Higher Educational Institute" in rule['Rule'] or "Certification" in rule['Rule']]
+    work_rules = [rule for rule in JD_dict['Rules'] if "Work Experience" in rule['RuleType']]
+    return ol_rules, al_rules, degree_rules, work_rules
+
+def Create_JSON_structures(ol_rules, al_rules, degree_rules, work_rules):
+    ol_json_strings = [json.dumps(item, indent=4) for item in ol_rules]
+    ol_json = ",\n".join(ol_json_strings)
+    al_json = json.dumps(al_rules[0], indent=4)
+    degree_json = {"Rules": degree_rules}
+    work_json = {"Rules": work_rules}
+    return al_json, work_json, degree_json
+
+# Grade comparison mapping
+grade_mapping = {
+    'A': 75,
+    'B': 65,
+    'C': 55,
+    'S': 45,
+    'W': 30
+}
+
+# Subject name variations mapping
+subject_variations = {
+    "Mathematics": ["Mathematics", "Math", "Maths"],
+    "Science": ["Science"],
+    "English": ["English"]
+}
+
+def extract_ol_results(CV_dict):
+    ol_description = ""
+    for qualification in CV_dict["Qualifications"]:
+        if qualification['QualificationName'] in ['G.C.E. Ordinary Level Examination', 'G.C.E. O/Level', 'G.C.E. O/Level Exam']:
+            ol_description = qualification["Description"]
+            OL_text = f'Qualification: {qualification["QualificationName"]}. Description: {ol_description}'
+            break
+
+    if not ol_description:
+        return {}, ""
+
     try:
-        # Open the PDF from bytes
-        pdf_document = fitz.open(stream=BytesIO(pdf_bytes), filetype="pdf")
-        # Select the specific page
-        page = pdf_document.load_page(page_number)
+        # Parse the description to get subject-grade pairs
+        ol_results = {item.split()[0].strip(): item.split()[1].strip() for item in ol_description.split(', ')}
 
-        # Get text blocks from the page
-        text_blocks = page.get_text("blocks")
-
-        # Get the x-coordinates of the text blocks
-        x_coords = [block[:2] for block in text_blocks]  # (x0, x1)
-
-        # Determine the column positions by clustering x-coordinates
-        x_coords = np.array(x_coords)
-        x_start_coords = x_coords[:, 0]
-
-        # Determine unique column positions with some tolerance
-        tolerance = 20
-        columns = []
-
-        for x in sorted(x_start_coords):
-            if not any(abs(x - col) < tolerance for col in columns):
-                columns.append(x)
-
-        return len(columns)
-
+        # Normalize subjects in results based on variations mapping
+        normalized_results = {}
+        for standard_subject, variations in subject_variations.items():
+            for variation in variations:
+                if variation in ol_results:
+                    normalized_results[standard_subject] = ol_results[variation]
+                    break
+                
+        return normalized_results, OL_text
     except Exception as e:
-        print(f"Error: {e}")
-        return 0
+        # Handle parsing errors
+        OL_text = "Invalid result format"
+        return {}, OL_text
+
+# Check if the O-Level rules are satisfied
+def check_ol_rule(subject, required_grade, logic, normalized_results):
+    if subject not in normalized_results:
+        return False
+    actual_grade = normalized_results[subject]
+    return grade_mapping[actual_grade] >= grade_mapping[required_grade]
+
+
+# Process O-Level rules
+def process_ol_rules(ol_rules, normalized_results, OL_text):
+    output = {"Rules": []}
+    rule_satisfaction = {}
+    for rule in ol_rules:
+        subject, required_grade = rule["Entry"].split(' - ')
+        rule_satisfaction[rule["Entry"]] = check_ol_rule(subject, required_grade, rule["Logic"], normalized_results)
+        
+    for rule in ol_rules:
+        subject = rule["Entry"]
+        rule_status = "Fulfilled" if rule_satisfaction.get(subject, False) else "Not Fulfilled"
+        output_rule = {
+            "RuleType": "Qualification",
+            "Rule": rule["Rule"],
+            "Entry": subject,
+            "Logic": rule["Logic"],
+            "CorrespondingText": OL_text,
+            "RuleStatus": rule_status
+        }
+        output["Rules"].append(output_rule)
+       
+    return output
+
+# Extract and compare A-Level results
+def process_al_rules(CV_dict, JD_dict, output):
+    AL_rule = {
+        "RuleType": "Qualification",
+        "Rule": "G.C.E. Advanced Level",
+        "Entry": "",
+        "Logic": "equal or better",
+        "CorrespondingText": "",
+        "RuleStatus": "Fulfilled"
+    }
+
+    result_mark = []
+    for qualification in CV_dict['Qualifications']:
+        if qualification['QualificationName'] in ['G.C.E. Advanced Level Examination', 'G.C.E. A/Level', 'G.C.E. A/Level Exam']:
+            results = qualification['Description']
     
-
-def extract_text_from_two_columns_pdfplumber(pdf_bytes):
-    text = []
-
-    with pdfplumber.open(BytesIO(pdf_bytes)) as pdf:
-        for page in pdf.pages:
-            width = page.width
-            height = page.height
-
-            # Define the bounding boxes for the left and right columns
-            left_bbox = (0, 0, width / 2, height)
-            right_bbox = (width / 2, 0, width, height)
-
-            # Extract text from each column
-            left_text = page.within_bbox(left_bbox).extract_text()
-            right_text = page.within_bbox(right_bbox).extract_text()
-
-            # Combine the text from both columns
-            combined_text = (left_text or "") + "\n" + (right_text or "")
-            text.append(combined_text)
-
-    return "\n".join(text)
-
-
-def convert_pdf_to_text(pdf_bytes):
-    try:
-        text = ""
-        # Open the bytes as a PDF file
-        with pdfplumber.open(BytesIO(pdf_bytes)) as pdf:
-            for page in pdf.pages:
-                text += page.extract_text() or ''  # Ensure we handle None values
-
-        return text
-
-    except Exception as e:
-        print(f"Error: {e}")
-        return ""
+            AL_rule['CorrespondingText'] = f'Qualification: {qualification["QualificationName"]}. Description: {results}'
+            results_list = results.split(',')
+            results_list = [x.strip()[-1] for x in results_list]
     
+            for grade in results_list:
+                if grade == 'A':
+                    result_mark.append(75)
+                elif grade == 'B':
+                    result_mark.append(65)
+                elif grade == 'C':
+                    result_mark.append(55)
+                elif grade == 'S':
+                    result_mark.append(45)
+                elif grade in ['F', 'W']:
+                    result_mark.append(30)
+
+    cut_off_value = 0
+    for i in JD_dict['Rules']:
+
+      if i['Rule'] == 'G.C.E. Advanced Level':
+        AL_rule['Entry'] = i['Entry']
+        cut_off_grade = i['Entry'][0]
+    
+        if cut_off_grade == 'A':
+          cut_off_value = 75
+    
+        if cut_off_grade == 'B':
+          cut_off_value = 65
+    
+        if cut_off_grade == 'C':
+          cut_off_value = 55
+    
+        if cut_off_grade == 'S':
+          cut_off_value = 45
+    
+        if cut_off_grade == 'F' or cut_off_grade == 'W':
+          cut_off_value = 30
 
 
-def extract_details(user_input):
+    for i in result_mark:
+        if i < cut_off_value:
+            AL_rule['RuleStatus'] = "Not Fulfilled"
+            break
+
+    output["Rules"].append(AL_rule)
+    return output
+
+def degree_relation(rule_relation, cv_relation):
   
-  prompt = extract_detailsPrompt_main.format(user_input=user_input)
+  prompt = degree_comparePrompt_main.format(rule_relation=rule_relation,cv_relation=cv_relation)
+  
   # Make a request to the OpenAI GPT-3 model
   response = client.chat.completions.create(
       model = "gpt-35-turbo",
       messages = [
           {"role":"system", "content":prompt},
-          {"role":"user", "content":user_input}],
-      max_tokens = 2000,
+          {"role":"user", "content":rule_relation},
+          {"role":"user", "content":cv_relation}
+          ],
+      max_tokens = 600,
       n = 1,
       temperature = 0.2,
       top_p = 0.1
@@ -121,238 +216,330 @@ def extract_details(user_input):
 
   return generated_content
 
-############## Qualifications JSON Format
 
-# Function to encode text into embeddings
-def encode_text(text, model):
-    return model.encode(text, convert_to_tensor=True).unsqueeze(0)
+# Process Degree rules
+def process_degree_rules(degree_json, CV_dict, output):
 
+    # Initialize a list to store sentences and qualification codes
+    cv_deg_relation_sentences = []
+    deg_sim_scores = []
+    qualification_codes = []
 
-# Function to compute cosine similarity between two embeddings
-def compute_cosine_similarity(embedding1, embedding2):
-    return util.pytorch_cos_sim(embedding1, embedding2).item()
+    # Threshold for similarity
+    deg_threshold = 50.0
 
+    # Iterate over each qualification in the qualifications list
+    for qualification in CV_dict["Qualifications"]:
+        qualification_code = qualification["QualificationName"]
 
-# Function to update CV qualifications with the most similar degree
-def update_cv_qualifications(CV_json_dict, qual_list_json_str, model_name='all-MiniLM-L6-v2', similarity_threshold=0.65):
-    
-    qual_list_json = json.loads(qual_list_json_str)
-    
-    # Load the sentence transformer model
-    model = SentenceTransformer(model_name)
+        # Check if qualification is not "G.C.E. Advanced Level Examination" or "G.C.E. Ordinary Level Examination"
+        if "Exam" not in qualification_code:
+            qualification_codes.append(qualification_code)
 
-    # Iterate through CV qualifications and find the most similar degree
-    for qualification in CV_json_dict['Qualifications']:
-        qualification_name = qualification['QualificationName']
-        max_similarity = -1
-        best_match = qualification_name
+    # Load the rules from the rule JSON file
+    rules = degree_json['Rules']
 
-        # Encode qualification code into embedding
-        qualification_embedding = encode_text(qualification_name, model)
+    # Iterate through each rule
+    for rule in rules:
+        rule_type = rule['RuleType']
+        rule_description = rule['Rule']
+        entry = rule['Entry']
+        logic = rule['Logic']
+        
+        rule_deg_relation = f"The applicant has a {entry}."
+        rule_fulfilled = False
+        deg_corresponding_text = []
 
-        # Calculate similarity with each degree in the degree list
-        for qual in qual_list_json['QualificationList']:
-            qual_name = qual['QualificationName']
-            qual_type = qual['QualificationType']
-            qual_embedding = encode_text(qual_name, model)
-            similarity = compute_cosine_similarity(qualification_embedding, qual_embedding)
+        # Iterate through each qualification
+        for i, qualification in enumerate(qualification_codes, start=1):
+            qualification_code = qualification
 
-            if similarity > max_similarity:
-                max_similarity = similarity
-                best_match = qual_name
-                best_type = qual_type
+            cv_deg_relation = f"The applicant has a {qualification_code}."
 
-        # Only replace if max similarity exceeds 0.65
-        if max_similarity > 0.65:
-            qualification['BestMatchingQualificationName'] = best_match
-            qualification['QualificationType'] = best_type 
+            # Append the sentence to the list for optional future use
+            cv_deg_relation_sentences.append(cv_deg_relation)
+
+            # Compare the qualification with the rule
+            deg_score = degree_relation(rule_deg_relation, cv_deg_relation)
+
+            # Convert str "%" to float
+            numeric_str = deg_score.strip('%')
+            deg_percent_float = float(numeric_str)
+
+            deg_sim_scores.append(deg_percent_float)
+
+            # Always collect corresponding text
+            deg_corresponding_text.append(cv_deg_relation)
+            
+
+            # Check if the similarity score meets the threshold
+            if deg_percent_float >= deg_threshold:
+                rule_fulfilled = True
+
+        # Determine rule status
+        if rule_fulfilled:
+            rule_status = "Fulfilled"
         else:
-            qualification['BestMatchingQualificationName'] = ""
-            qualification['QualificationType'] = best_type
+            rule_status = "Not Fulfilled"
 
-    return CV_json_dict
+        # Create dictionary for JSON output
+        deg_dict = {
+            "RuleType": rule_type,
+            "Rule": rule_description,
+            "Entry": entry,
+            "Logic": logic,
+            "CorrespondingText": deg_corresponding_text,
+            "RuleStatus": rule_status
+        }
+
+        # Append to output["Rules"]
+        output["Rules"].append(deg_dict)
+
+    # Convert output to JSON format
+    final_json = json.dumps(output, indent=4)
+    print(final_json)
+
+    return output
 
 
+# Work experience comparison function using Azure's OpenAI service
+def compare_work(rule, cv, prompt_type):
+    if prompt_type == "relation":
+        
+        prompt = relation_workPrompt_main.format(rule=rule,cv=cv)
+        
+    elif prompt_type == "duration":
+        
+        prompt = duration_workPrompt_main.format(rule=rule,cv=cv)
+        
+    else:
+        raise ValueError("Invalid prompt type. Choose either 'relation' or 'duration'.")
+
+    response = client.chat.completions.create(
+        model="gpt-35-turbo",
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": rule},
+            {"role": "user", "content": cv}
+        ],
+        max_tokens=600,
+        n=1,
+        temperature=0.2,
+        top_p=0.1
+    )
+
+    generated_content = response.choices[0].message.content.strip()
+
+    return generated_content
+
+def calculate_duration(date1, date2):
+    # Convert the date strings to datetime objects
+    dt1 = datetime.strptime(date1, "%d/%m/%Y")
+    dt2 = datetime.strptime(date2, "%d/%m/%Y")
+
+    # Calculate the difference between the dates
+    delta = dt2 - dt1
+
+    # Calculate number of years and months in the difference
+    years = delta.days // 365
+    months = (delta.days % 365) // 30
+
+    return years, months
+    
+def aggregate_durations(durations):
+    total_years = 0
+    total_months = 0
+
+    for years, months in durations:
+        total_years += years
+        total_months += months
+
+    # Convert months to years and months
+    total_years += total_months // 12
+    total_months = total_months % 12
+
+    return total_years, total_months
+
+# Process work experience rules
+def process_work_experience_rules(work_json, CV_dict, output):
+
+    entry = work_json['Rules'][0]['Entry']
+    # Combine them into a natural language text
+    rule_work_relation = f"The applicant has worked in the field of {entry} or similar."
+    # Initialize a list to store sentences
+    cv_relation_sentences = []
+    sim_scores = []
+    durations = []
+
+    # Threshold for similarity
+    threshold = 50.0
 
 
+    for i, experience in enumerate(CV_dict["WorkExperiences"], start=1):
+        company_name = experience["CompanyName"]
+        position_held = experience["PositionHeld"]
+        joined_as = experience["JoinedAs"]
 
-def compare_and_update_json(input_json):
-    required_json_structure = {
-    "TitleCode": "",
-    "Initials": "",
-    "FirstName": "",
-    "Surname": "",
-    "FullName": "",
-    "DateOfBirth": "",
-    "GenderCode": "",
-    "NicNumber": "",
-    "PAddress1": "",
-    "PAddress2": "",
-    "PAddress3": "",
-    "DistrictCode": "",
-    "PCountry": "",
-    "PPostalCode": "",
-    "Email": "",
-    "RTelephone": "",
-    "MobileNumber": "",
-    "ReligionCode": "",
-    "RaceCode": "",
-    "NationalityCode": "",
-    "MaritalStatusCode": "",
-    "FatherName": "",
-    "FatherOccupation": "",
-    "MotherName": "",
-    "MotherOccupation": "",
-    "DateAvaliableForWork": "",
-    "DesiredSalary": "",
-    "ReferredBy": "",
-    "CategoryCode": "",
-    "PictureName": "",
-    "PictureContentBase64String": "",
-    "Spouses": [
-        {
-            "SpouseCode": "",
-            "SpouseName": "",
-            "DateOfBirth": "",
-            "Occupation": "",
-            "Employer": "",
-            "Alive": ""
-        }
-    ],
-    "Childrens": [
-        {
-            "ChildCode": "",
-            "ChildName": "",
-            "DateOfBirth": "",
-            "ChildType": "",
-            "School": "",
-            "PassportNumber": "",
-            "Alive": ""
-        }
-    ],
-    "Qualifications": [
-        {
-            "QualificationType": "",
-            "QualificationName": "",
-            "BestMatchingQualificationName":"",
-            "InstituteCode": "",
-            "FromYear": "",
-            "FromMonth": "",
-            "ToYear": "",
-            "ToMonth": "",
-            "Description" : ""
-        }
-    ],
-    "WorkExperiences": [
-        {
-            "CompanyName": "",
-            "Address": "",
-            "JoinedDate": "",
-            "JoinedAs": "",
-            "PositionHeld": "",
-            "Resigned": "",
-            "ResignedDate": "",
-            "LastDrawnSalary": "",
-            "CurrencyCode": "",
-            "PreviousEpfNumber": "",
-            "ExperienceType": "",
-            "ReasonToLeave": ""
-        }
-    ],
-    "Achievements": [
-        {
-            "AwardName": "",
-            "Year": "",
-            "Comments": ""
-        }
-    ],
-    "Referee": [
-        {
-            "RefereeName": "",
-            "RefereeCompanyName": "",
-            "RefereeDesignation": "",
-            "PhoneNumber": "",
-            "Email": "",
-            "RefereeAddress": "",
-            "HowRefereeKnows": ""
-        }
+        if position_held == "":
+            cv_work_relation = f"""The applicant has worked as a {joined_as} at {company_name}."""
+        else:
+            cv_work_relation = f"""The applicant has worked as a {position_held} at {company_name}."""
+       # Append the sentence to the list for optional future use
+        cv_relation_sentences.append(cv_work_relation)
+
+        if position_held == "" and joined_as =="":
+            score = "0%"
+        else:
+            score = compare_work(rule_work_relation, cv_work_relation, "relation")
+    
+        # Convert str "%" to float
+        numeric_str = score.strip('%')
+        percent_float = float(numeric_str)
+    
+        sim_scores.append(percent_float)
+    
+    
+        if percent_float >= threshold:
+    
+              Rule_Status_1 = "The rule is fulfilled"
+        
+              joined_date = experience["JoinedDate"]
+        
+              if experience["Resigned"] == False:
+                 today = datetime.today()
+                 # Format the date as day/month/year
+                 resigned_date = today.strftime("%d/%m/%Y")
+        
+              else:
+                 resigned_date = experience["ResignedDate"]
+        
+              duration = calculate_duration(joined_date, resigned_date)
+              durations.append(duration)
+        
+              total_years, total_months = aggregate_durations(durations)
+        
+              work_logic = work_json['Rules'][0]['Logic']
+              rule_duration = f"The applicant has worked for {work_logic}."
+        
+              cv_duration = f"The applicant has worked for {total_years} years and {total_months} months."
+        
+              process_duration = compare_work(rule_duration, cv_duration, "duration")
+        
+              if process_duration == "The rule is fulfilled.":
+                Rule_Status_2 = "The rule is fulfilled"
+        
+              else:
+                Rule_Status_2 = "The rule is not fulfilled"
+    
+        else:
+          Rule_Status_1 = "The rule is not fulfilled"
+
+    # Determine the final output based on the overall rule status
+    if Rule_Status_1 == "The rule is not fulfilled":
+      final_output = "Not Fulfilled"
+    elif Rule_Status_1 == "The rule is fulfilled" and Rule_Status_2 == "The rule is not fulfilled":
+      final_output = "Not Fulfilled"
+    else:
+      final_output = "Fulfilled"
+    
+    # Save the final output to a variable
+    Rule_Status = final_output
+
+    # Use list comprehension to create formatted strings
+    formatted_strings = [
+        f"Company Name: {exp['CompanyName']}, Joined As: {exp['JoinedAs']}, Position Held: {exp['PositionHeld']}, JoinedDate: {exp['JoinedDate']}, ResignedDate: {exp['ResignedDate']}"
+        for exp in CV_dict["WorkExperiences"]
     ]
+
+    # Join the list items into a single string separated by a comma and space
+    corresponding_text = ', '.join(formatted_strings)
+    
+    rule_type = work_json['Rules'][0]['RuleType']
+    rule = work_json['Rules'][0]['Rule']
+    entry = work_json['Rules'][0]['Entry']
+    logic = work_json['Rules'][0]['Logic']
+    corresponding_text = corresponding_text
+    rule_status = Rule_Status
+
+
+    # Create the dictionary for the JSON output
+    work_dict = {
+        "RuleType": rule_type,
+        "Rule": rule,
+        "Entry": entry,
+        "Logic": logic,
+        "CorrespondingText": corresponding_text,
+        "RuleStatus": rule_status
     }
+
+    output["Rules"].append(work_dict)
     
-    def update_dict(required_dict, input_dict):
-        
-        updated_dict = {}
-        
-        for key, value in required_dict.items():
-            if key in input_dict:
+    return output
 
-                # If the value is a list, handle list comparison
-                if isinstance(value, list):
-                    updated_dict[key] = update_list(value, input_dict[key])
+# Calculate overall score
+def calculate_score(output):
+    fulfilled_count = sum(1 for rule in output['Rules'] if rule['RuleStatus'] == 'Fulfilled')
+    total_rules = len(output['Rules'])
+    overall_score = (fulfilled_count / total_rules) * 100
+    output["OverallScore"] = overall_score
+    return output
 
-                # If the value is a dictionary, handle dictionary comparison
-                elif isinstance(value, dict):
-                    updated_dict[key] = update_dict(value, input_dict[key])
-                else:
-                    updated_dict[key] = input_dict[key]
-            else:
-                updated_dict[key] = value
 
-        return updated_dict
+def validate_and_clean_compare_result(input_json):
+    expected_structure = {
+        "RuleType": "",
+        "Rule": "",
+        "Entry": "",
+        "Logic": "",
+        "CorrespondingText": "",
+        "RuleStatus": ""
+        "RuleStatus"
+    }
 
-    def update_list(required_list, input_list):
-        # Create a new list to store the updated input list
-        updated_list = []
+    cleaned_compare_result = []
 
-        for item in input_list:
-            updated_item = update_dict(required_list[0], item)
-            updated_list.append(updated_item)
+    for result in input_json.get("Rules", []):
+        cleaned_result = {}
+        for key in expected_structure:
+            cleaned_result[key] = result.get(key, "")
+        cleaned_compare_result.append(cleaned_result)
 
-        return updated_list
+    cleaned_json = {
+        "Rules": cleaned_compare_result,
+        "OverallScore": input_json.get("OverallScore", "")
+    }
 
-    # Start the update process with the top-level dictionary
-    updated_json = update_dict(required_json_structure, input_json)
-    
-    return updated_json
+    return cleaned_json
+
 
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
-    current_dir = os.path.dirname(__file__)
-
     try:
-       
         data = req.get_json()
-        content = data.get('cvb64')
-        qual_list = data.get('quallist')
-        decode = base64.b64decode(content)
-        num_columns = estimate_columns(decode)
-
-        if num_columns == 2:
-            extracted_text = extract_text_from_two_columns_pdfplumber(decode)
-        else:
-            extracted_text = convert_pdf_to_text(decode)
+        JD_dict = data.get('Rule_json')
+        CV_dict = data.get('CV_json')
         
 
-        CV_json = extract_details(extracted_text)
-        CV_json_dict = json.loads(CV_json)
-       
-        qual_list_json = json.dumps(qual_list)
-        updated_cv_json = update_cv_qualifications(CV_json_dict,qual_list_json)
-        updated_json = compare_and_update_json(updated_cv_json)
-       
-        # Create the response dictionary with the key "CVDetails"
-        response_data = {
-            "CVDetails": updated_json
-        }
+        if not JD_dict or not  CV_dict:
+            raise ValueError("Both 'Rule_json' and 'CV_json' must be provided")
 
-        # Return the response as JSON
+        ol_rules, al_rules, degree_rules, work_rules = separate_rules(JD_dict)
+        al_json, work_json, degree_json    = Create_JSON_structures(ol_rules, al_rules, degree_rules, work_rules)
+        normalized_results, OL_text = extract_ol_results(CV_dict)
+        output = process_ol_rules(ol_rules, normalized_results, OL_text)
+        output = process_al_rules(CV_dict, JD_dict, output)
+        output = process_degree_rules(degree_json, CV_dict, output)
+        output = process_work_experience_rules(work_json, CV_dict, output)
+        output = calculate_score(output)
+
+        response_data = validate_and_clean_compare_result(output)
+
+
         return func.HttpResponse(json.dumps(response_data), mimetype="application/json", status_code=200)
-
-       
-
     except Exception as e:
         logging.error(f"Error processing request: {e}")
         return func.HttpResponse(f"Error processing request: {e}", status_code=500)
+
