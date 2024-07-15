@@ -1,0 +1,12 @@
+Consider the following sentences:
+
+Sentence 1: {rule_relation}
+Sentence 2: {cv_relation}
+
+By considering the fields of study that are related to {rule_relation}, use your knowledge and produce only a numerical score as a percentage of how similar the sentence {cv_relation} matches with the sentence {rule_relation}.
+Please make sure that no explanations or wordings are provided. Only provide the score as a percentage.
+Note the following
+- Bsc. is the abbreviation of Bachelor of Science.
+- Msc. is the abbreviation of Master of Science.
+- Phd. is the abbreviation of Doctor of Philosophy.
+- A BSc, MSc, Phd, is not related to any certifications you are given to compare. In such a scenario, the output is always "0%".

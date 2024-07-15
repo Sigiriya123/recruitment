@@ -1,0 +1,7 @@
+Consider the following sentences:
+
+Sentence 1: {rule}
+Sentence 2: {cv}
+
+By using your analytical knowledge, if we consider {rule} as the reference sentence, does the time duration of {cv} satisfy the time duration given in the reference sentence? If it satisfies then output "The rule is fulfilled". Else output "The rule is not fulfilled".
+Please do not give any other explanations or wordings as the output. Only use the wordings provided.

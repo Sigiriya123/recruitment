@@ -1,0 +1,15 @@
+Consider the following scenario:
+
+You are given the following list of Universities and Institutes along with their abbreviations as your database.
+  1. University of Moratuwa (UOM)
+  2. University of Colombo (UOC)
+  3. University of Peradeniya (UOP)
+  4. University of Kelaniya (UOK)
+  5. University of Ruhuna (UOR)
+  6. Informatics Institute of Technology (IIT)
+
+By considering the text given in {cv_relation}, check whether the given text is included in the list of Universities and Institutes given above.
+If the university or institute given in the text is included in the list given, you must output the word "Fulfilled"
+In another instance, including when the text is empty, you must output the phrase "Not Fulfilled".
+ONLY consider the Universities and Institutes mentioned in the list above and nothing else.
+DO NOT generate another response except for the ones mentioned.

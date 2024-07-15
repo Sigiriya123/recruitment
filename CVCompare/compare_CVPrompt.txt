@@ -1,0 +1,387 @@
+ Imagine you are an expert Answer Providing System. Your task is to determine if the text of the given JSON file within '<<<' and '>>>' tags satisfies the rules specified within the '<rules>' and '</rules>' tags.
+
+  To the place of 'rules', the rules will be provided as a list of rules in the JSON format. Provide the final output in the following JSON format which includes all rules provided in the list of rules:
+
+  ```
+{{
+  "Rule 1": {{
+      "RuleType": "<Insert Rule type>",
+      "Rule": "<Insert Rule>",
+      "Entry": "<Insert Rule Entry>",
+      "Logic": "<Insert Rule Logic>",
+      "CorrespondingText": "<Insert Text>",
+      "RuleStatus": "<Insert Rule Status>"
+    }},
+  "Rule 2": {{
+      "RuleType": "<Insert Rule type>",
+      "Rule": "<Insert Rule>",
+      "Entry": "<Insert Rule Entry>",
+      "Logic": "<Insert Rule Logic>",
+      "CorrespondingText": "<Insert Text>",
+      "RuleStatus": "<Insert Rule Status>"
+    }},
+  "Rule 3": {{
+      "RuleType": "<Insert Rule type>",
+      "Rule": "<Insert Rule>",
+      "Entry": "<Insert Rule Entry>",
+      "Logic": "<Insert Rule Logic>",
+      "CorrespondingText": "<Insert Text>",
+      "RuleStatus": "<Insert Rule Status>"
+    }}
+  ....
+}}
+  ```
+
+
+- Use the same analysis logic as demonstrated in the examples below to determine if the rule is fulfilled or not. Replace "<Insert Rule type>", "<Insert Rule>", "<Insert Rule Entry>", "<Insert Rule Logic>", "<Insert Text>", and "<Insert Rule Status>" with the appropriate values.
+- You will have to give your answers based on the following sections which will be listed out separately with appropriate examples which will help you give out the correct answer.
+- Take your time and carefully go through the analyses in each section and give the most correct answer.
+
+###Section 1: G.C.E. Ordinary Level Examination OR G.C.E. O/Level Examination.
+
+- Please take your time and carefully go through the analyses in each section and give the most correct answer.
+
+This examination follows the following grading hierarchy which you will have to strictly adhere to.
+- A grade is better than B grade AND B grade is lower than A grade.
+- A grade is better than C grade AND C grade is lower than A grade.
+- A grade is better than S grade AND S grade is lower than A grade.
+- A grade is better than W grade AND W grade is lower than A grade.
+- B grade is better than C grade AND C grade is lower than B grade.
+- B grade is better than S grade AND S grade is lower than B grade.
+- B grade is better than W grade AND W grade is lower than B grade.
+- C grade is better than S grade AND S grade is lower than C grade.
+- C grade is better than W grade AND W grade is lower than C grade.
+- S grade is better than W grade AND W grade is lower than S grade.
+- W is the failing grade.
+
+
+###Section 2: G.C.E. Advanced Level Examination OR G.C.E. A/Level Examination.
+
+- Please take your time and carefully go through the analyses in each section and give the most correct answer.
+
+This examination follows the following grading hierarchy which you will have to strictly adhere to.
+- A grade is better than B grade AND B grade is lower than A grade.
+- A grade is better than C grade AND C grade is lower than A grade.
+- A grade is better than S grade AND S grade is lower than A grade.
+- A grade is better than F grade AND F grade is lower than A grade.
+- B grade is better than C grade AND C grade is lower than B grade.
+- B grade is better than S grade AND S grade is lower than B grade.
+- B grade is better than F grade AND F grade is lower than B grade.
+- C grade is better than S grade AND S grade is lower than C grade.
+- C grade is better than F grade AND F grade is lower than C grade.
+- S grade is better than F grade AND F grade is lower than S grade.
+- F is the failing grade.
+
+
+###Section 3: University / Higher Educational Institute Qualification.
+
+- Please take your time and carefully go through the analyses in each section and give the most correct answer.
+- Please note that it is internationally acknowledged that if an applicant possesses a Master's degree in a related field, this implies that the applicant has also successfully completed the Bachelor's degree in the same field.
+- Your knowledge on fields of study that are related to the ones mentioned in the rules would be usefull here.
+
+
+###Section 4: Work Experience.
+ 
+- Please take your time and carefully go through the analyses in each section and give the most correct answer.
+ 
+Note:
+ - Please consider all work experiences mentioned in the input text and check for the following requirements.
+ - Step 1: Requirement 1 to satsify: the field of the either the "Position Held" or "Company Name" needs to satisfy the Rule Entry provided not both.
+ - Step 2: Requirement 2 to satisfy: Once the first requirement is fulfilled. The Total Time duration that is calculated in the analysis needs to satisfy the Rule Entry and Logic provided.
+ - Step 3: Only if both these requiremnts are satisfied will the following be considered:
+      - If the rule given is partially or partly fulfilled, Final Conclusion: Rule is Fulfilled.
+      - If the rule given is fulfilled completely, Final Conclusion: Rule is Fulfilled.
+      - If the rule given is neither partially nor fully satistfied, Final Conclusion: Rule is not Fulfilled.
+ - Follow all steps of the analysis provided in the example carefully.
+ 
+Let us look at some examples to aid in the providing a better answer.
+ 
+
+##Example1:
+
+ - Rule Description: The applicant has an S grade or better in Science in the G.C.E. Ordinary Level Examination.
+ - Corresponding Text: 'Qualification: G.C.E. Ordinary Level Examination. Description: Science - C'.
+ - Analysis:
+     The input is given as follows:
+     "QualificationTypeCode": "Academic",
+     "QualificationCode": "G.C.E. Ordinary Level Examination",
+     "Description": "Science: C, Mathematics: B, ICT: A, English: C, Sinhala: C, History: A, Buddhism: A"
+     The applicant has a C grade in Science.
+     According to the Grade Hierarchy C is better than an S grade.
+     According to the Logic of the Rule, the applicant has a grade better than an S grade for Science in the G.C.E. Ordinary Level Examination.
+ - Rule Status: The rule is fulfilled.
+
+##Example2:
+
+ - Rule Description: The applicant has a C grade or better in Maths in the G.C.E. Ordinary Level Examination.
+ - Corresponding Text: 'Qualification: G.C.E. Ordinary Level Examination. Description: Maths - A'.
+ - Analysis:
+     The input is given as follows:
+     "QualificationTypeCode": "Academic",
+     "QualificationCode": "G.C.E. Ordinary Level Examination",
+     "Description": "Science: A, Maths: A, ICT: A, English: C, Sinhala: C, History: A, Buddhism: A"
+     The applicant has as A grade Maths.
+     According to the Grade Hierarchy A is better than a C grade.
+     According to the Logic of the Rule, the applicant has a grade better than a C grade for Maths in the G.C.E. Ordinary Level Examination.
+ - Rule Status: The rule is fulfilled.
+
+##Example3:
+
+ - Rule Description: The applicant has a B grade or better in Maths in the G.C.E. Ordinary Level Examination.
+ - Corresponding Text: 'Qualification: G.C.E. Ordinary Level Examination. Description: Maths - W'
+ - Analysis:
+     The input is given as follows:
+     "QualificationTypeCode": "Academic",
+     "QualificationCode": "G.C.E. Ordinary Level Examination",
+     "Description": "Science: A, Maths: W, ICT: A, English: C, Sinhala: C, History: A, Buddhism: A"
+     The applicant has as W grade Maths.
+     According to the Grade Hierarchy W is not better than a B grade.
+     According to the Logic in the Rule, the applicant do not have a grade better than a B grade for Maths in the G.C.E. Ordinary Level Examination.
+ - Rule Status: The rule is not fulfilled.
+
+##Example4:
+
+ - Rule Description: The applicant has S grades or better in three subjects in the G.C.E Advanced Level Examinations.
+ - Corresponding Text: 'Qualification: G.C.E. Advanced Level Examination. Description: Combined Maths - C, Physics - C, Chemistry - C'.
+ - Analysis:
+     The input given is as follows:
+     "QualificationTypeCode": "Academic",
+     "QualificationCode": "G.C.E. Advanced Level Examination",
+     "Description": "Combined Maths: C, Physics: C, Chemistry: C"
+     According to the "Description": "Combined Maths: C, Physics: C, Chemistry: C".
+     The applicant's grades are:
+       - Subject 1 - C. According to the Grade Hierarchy, C grade is better than S grade. Hence Subject 1 has a better grade than S.
+       - Subject 2 - C. According to the Grade Hierarchy, C grade is better than S grade. Hence Subject 2 has a better grade than S.
+       - Subject 3 - C. According to the Grade Hierarchy, C grade is better than S grade. Hence Subject 3 has a better grade than S.
+     According to the analysis, Subject 1, Subject 2, Subject 3 all have grades better than the S grade. According to the Logic of the Rule, the applicant has three grades that are better than a S grade in all three subjects. Therefore, the rule is fulfilled.
+ - Rule Status: The rule is fulfilled.
+
+##Example5:
+
+ - Rule Description: The applicant has C grades or better in three subjects in the G.C.E Advanced Level Examinations
+ - Corresponding Text: 'Qualification: G.C.E. Advanced Level Examination. Description: Combined Maths - B, Physics - C, ICT - B'.
+ - Analysis:
+    The given input is as follows:
+    "QualificationTypeCode": "Academic",
+    "QualificationCode": "G.C.E. Advanced Level Examination",
+    "Description": "Combined Maths: B, Physics: C, ICT: B"
+    According to the "Description": "Combined Maths: B, Physics: C, ICT: B".
+    The applicant's grades are:
+      - Subject 1 - B. B grade is better than C grade. Hence Subject 1 has a better grade than C.
+      - Subject 2 - C. C grade is equivalent to a C grade. Hence Subject 2 is equal to a grade C.
+      - Subject 3 - B. B grade is better than C grade. Hence Subject 3 has a better grade than S.
+    According to the Grade Hierarchy, a C grade is equal to a C grade AND a B grade is better than a C grade.
+    According to the analysis, Subject 1, Subject 2, Subject 3 all have grades better than the C grade. According to the Logic of the Rule, the applicant has three grades that are better than a C grade in all three subjects. Therefore, the rule is fulfilled.
+ - Rule Status: The rule is fulfilled.
+
+##Example6:
+
+ - Rule Description: The applicant has S grades or better in three subjects in the G.C.E Advanced Level Examinations
+ - Corresponding Text: 'Qualification: G.C.E. Advanced Level Examination. Description: Combined Maths - C, Physics - F, ICT - S'.
+ - Analysis:
+    The input given is as follows:
+    "QualificationTypeCode": "Academic",
+    "QualificationCode": "G.C.E. Advanced Level Examination",
+    "Description": "Combined Maths: C, Physics: F, ICT: S"
+    According to the "Description": "Combined Maths: C, Physics: F, ICT: S".
+    The applicant's grades are:
+      - Subject 1 - C. C grade is better than S grade. Hence Subject 1 has a better grade than S.
+      - Subject 2 - F. F grade is less than S grade. Hence Subject 2 has a lesser grade than S.
+      - Subject 3 - S. S grade is equivalent to S grade. Hence Subject 3 has a better grade than S.
+    According to the Grade Hierarchy, an F grade is lesser than a S grade.
+    According to the analysis, Subject 2 has a lesser grade than S grade. According to the Logic of the Rule, the applicant has atleast one subject that does not have a grade that is better than a S grade. Therefore, the rule is not fulfilled
+ - Rule Status: The rule is not fulfilled.
+
+##Example7:
+
+ - Rule Description: The applicant should be a BSc. (Hons) Degree holder in Statistics, Computer Science or any other related field
+ - Corresponding Text:
+     'Qualification: MSc. in Industrial Statistics and Mathematical Finance,
+     Qualification: Bachelor of Information Technology (BIT) in Information Technology'.
+ - Analysis:
+    You are given the following input:
+    Qualification1:
+      "QualificationTypeCode": "Academic",
+      "QualificationCode": "MSc. in Industrial Statistics and Methematical Finance"
+    Qualification2:
+      "QualificationTypeCode": "Academic",
+      "QualificationCode": "Bachelor of information technology(BIT), Information Technology"
+
+    - Qualification 1: MSc. in Industrial Statistics and Methematical Finance.
+        According to this, the field is Statistics. According to the Rule Entry, the field of study is satisfied.
+        Conclusion: Qualification 1 fulfills the rule.
+    - Qualification 2: Bachelor of Information Technology (BIT), Information Technology
+        According to this, the field is related to Computer Science. According to the Rule Entry, the field of study is satisfied.
+        Conclusion: Qualification 2 fulfills the rule.
+    Qualification 1 and Qualification 2 fulfills the rule. Both qualifications fulfills the rule. Therefore, rule is fulfilled
+ - Rule Status: The rule is fulfilled
+
+##Example8:
+
+ - Rule Description: The applicant should be a BA. Degree holder in Business Administration or any other related field
+ - Corresponding Text:
+     'Qualification: BSc. in Statistics,
+     Qualification: Bachelor of Arts in Business Administration.'
+ - Analysis:
+     You are given the following input:
+    Qualification1:
+      "QualificationTypeCode": "Academic",
+      "QualificationCode": "BSc. in Statistics"
+    Qualification2:
+      "QualificationTypeCode": "Academic",
+      "QualificationCode": "Bachelor of Arts in Business Administration."
+
+     - Qualification 1: BSc. in Statistics.
+         According to this, the field is Statistics. According to the Rule Entry, the field of study is not satisfied.
+         Conclusion: Qualification 1 does not fulfill the rule.
+     - Qualification 2: Bachelor of Arts in Business Administration
+         According to this, the field is Business Administration. According to the Rule Entry, the field of study is satisfied.
+         Conclusion: Qualification 2 fulfills the rule.
+     Qualification 1 does not fulfill the rule while Qualification 2 fulfills the rule. There is atleast one qualification that fulfills the rule. Therefore, rule is fulfilled
+ - Rule Status: The rule is fulfilled
+
+##Example9:
+
+ - Rule Description: The applicant should be a BSc. (Hons) Degree holder in Statistics, Computer Science or any other related field
+ - Corresponding Text:
+     'Qualification: Bachelor of Science in Accountancy'.
+ - Analysis:
+    You are given the following input:
+    Qualification:
+      "QualificationTypeCode": "Academic",
+      "QualificationCode": "Bachelor of Science in Accountancy"
+    - Qualification: Bachelor of Science in Accountancy.
+        According to this, the field is Accountancy. According to the Rule Entry, the field of study is not satisfied.
+        Conclusion: Qualification does not fulfill the rule.
+    Qualification does not fulfill the rule. There is no qualification that fulfills the rule. Therefore, rule is not fulfilled
+ - Rule Status: The rule is not fulfilled
+
+##Example 10:
+ 
+  - Rule Description: More than 5 years of experience in the field of Biology or related field.
+  - Corresponding Text:
+      "Company Name: Microbiology Dept.. Position Held: Research Assistant. JoinedDate: 01/01/2018, ResignedDate: 01/09/2020.,
+      Company Name: Plant Sciences Dept.. Position Held: Lecturer. JoinedDate: 01/12/2020. ResignedDate: 01/09/2023."
+  - Analysis:
+      You are given the following input:
+      Work Experience1:
+       "CompanyName": "Microbiology Dept.",
+       "JoinedDate": "01/01/2018",
+       "PositionHeld": "Research Assistant",
+       "Resigned": true,
+       "ResignedDate": "01/09/2020"
+      Work Experience2:
+       "CompanyName": "Plant Sciences Dept.",
+       "JoinedDate": "01/12/2020",
+       "PositionHeld": "Lecturer",
+       "Resigned": true,
+       "ResignedDate": "01/09/2023"
+ 
+      Step 1: Now let us check whether Requirement 1 is satisfied.
+      Company Name: Microbiology Dept.. Position Held: Research Assistant. According to Rule Entry, Microbiology is a related field of Biology.
+      Company Name: Plant Sciences Dept.. Position Held: Lecturer. According to rule, Plant Sciences is a related field of Biology.
+      Both entries satisfy the field given in the rule. Hence Requirement 1 is satisfied by both work experiences.
+     
+      Step 2: Now let us check whether Requirement 2 is satisfied.
+      Lets calculate the total time duration of the work experiences.
+      Work Experience 1:
+      - Joined Date: 01/01/2018 which when converted to month and year is January 2018.
+      - Resigned Date: 01/09/2020 which when converted to month and year is September 2020.
+      - Total time duration between Joined Date and Resigned Date of Work Experience 1 is 2 years and 8 months.
+      Work Experience 2:
+      - Joined Date: 01/12/2020 which when converted to month and year is December 2020.
+      - Resigned Date: 01/09/2023 which when converted to month and year is September 2023.
+      - Total time duration between Joined Date and Resigned Date of Work Experience 2 is 2 years and 9 months.
+      Since all work experiences satisfys Requirement 1, we have to calculate the aggragated time duration of them.
+      When this calculation is done, for this scenario we get the following:
+      Total time duration: 2 years and 8 months, 2 years and 9 months aggrgates to 5 years and 5 months.
+      - According to the Rule Logic, the aggregate time duration needs to be more than 5 years.
+     
+      Step 3: The Total Time duration is 5 years and 5 months. Mathematically, 5 years and 5 months is more than 5 years.
+      Therefore, the rule is fulfilled.
+  - Rule Status: The rule is fulfilled.
+ 
+  ##Example 11:
+ 
+  - Rule Description: More than 3 years of experience in the field of Geology.
+  - Corresponding Text:
+      "Company Name: Geological Dept.. Position Held: Executive-Geology. JoinedDate: 01/01/2018, ResignedDate: 01/09/2022.,
+      Company Name: Plant Sciences Dept.. Position Held: Lecturer. JoinedDate: 01/12/2023, ResignedDate:"
+  - Analysis:
+      You are given the following input:
+      Work Experience1:
+       "CompanyName": "Geological Dept.",
+       "JoinedDate": "01/01/2018",
+       "PositionHeld": "Executive-Geology",
+       "Resigned": "true",
+       "ResignedDate": "01/09/2022"
+      Work Experience2:
+       "CompanyName": "Plant Sciences Dept.",
+       "JoinedDate": "01/12/2020",
+       "PositionHeld": "Lecturer",
+       "Resigned": "true",
+       "ResignedDate": "01/12/2023"
+     
+      Step 1: Now let us check whether Requirement 1 is satisfied.
+      Company Name: Geological Dept.. Position Held: Executive-Geology. According to Rule Entry, Geology is in field of Geology.
+      Company Name: Plant Sciences Dept.. Position Held: Lecturer. According to rule, Plant Sciences is not in the field of Geology.
+      Only one entry satisfy the field given in the rule. Requirement 1 is satisfied only by work experience 1.
+ 
+      Step 2: Now let us check whether Requirement 2 is satisfied.
+      Lets calculate the total time duration of the work experience 1.
+      Work Experience 1:
+      - Joined Date: 01/01/2018 which when converted to month and year is January 2018.
+      - Resigned Date: 01/09/2022 which when converted to month and year is September 2022.
+      - Total time duration between Joined Date and Resigned Date of Work Experience 1 is 4 years and 8 months.
+      Since work experience 1 satisfies Requirement 1, we have to calculate the aggragated time duration of them.
+      When this calculation is done, for this scenario we get the following:
+      Total time duration: 4 years and 8 months aggrgates to 4 years and 8 months.
+      - According to the Rule Logic, the aggregate time duration needs to be more than 3 years.
+     
+      Step 3: The Total Time duration is 4 years and 8 months. Mathematically, 4 years and 8 month5 is more than 3 years.
+      Therefore, the rule is fulfilled.
+  - Rule Status: The rule is fulfilled.
+ 
+##Example 12:
+ 
+  - Rule Description: More than 5 years of experience in Statistics or any related field.
+  - Corresponding Text:
+      "Company Name: Microbiology Dept.. Position Held: Research Assistant. JoinedDate: 01/01/2018, ResignedDate: 01/09/2020.,
+      Company Name: Plant Sciences Dept.. Position Held: Lecturer. JoinedDate: 01/12/2020, ResignedDate:"
+  - Analysis:
+      You are given the following input:
+      Work Experience1:
+       "CompanyName": "Microbiology Dept.",
+       "JoinedDate": "01/01/2018",
+       "PositionHeld": "Research Assistant",
+       "Resigned": true,
+       "ResignedDate": "01/09/2020"
+      Work Experience2:
+       "CompanyName": "Plant Sciences Dept.",
+       "JoinedDate": "01/12/2020",
+       "PositionHeld": "Lecturer",
+       "Resigned": "true",
+       "ResignedDate": "01/12/2023"
+ 
+      Step 1: Now let us check whether requirement 1 is satisfied.
+      Company Name: Microbiology Dept.. Position Held: Research Assistant. According to Rule Entry, Microbiology is not in the field of Statistics and is not related.
+      Company Name: Plant Sciences Dept.. Position Held: Lecturer. According to rule, Plant Sciences is in the field of Statistics and is not related.
+      Both entries does not satisfy the field given in the rule. Hence Requirement 1 is not satisfied by both work experiences.
+     
+      Since Step 1 is not satisfied, we move to Step 3.
+      Step 3: the rule is not fulfilled.
+  - Rule Status: The rule is not fulfilled.
+
+
+
+  Now, evaluate the following:
+
+  Text:
+  <<<
+  {user_input}
+  >>>
+
+  Rule:
+  <rule>
+  {rule_input}
+  </rule>

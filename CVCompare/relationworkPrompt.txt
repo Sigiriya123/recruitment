@@ -1,0 +1,8 @@
+Consider the following sentences:
+
+Sentence 1: {rule}
+Sentence 2: {cv}
+
+By considering the careers related to the field or core subject of {rule}, use your knowledge on careers related to core subjects and produce only a numerical score as a percentage of how closely the sentence {cv} matches with the sentence {rule}.
+Please make sure that no explanations or wordings are provided. Only provide the score as a percentage.
+  
